@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Page Title</title>
+    <meta charset="UTF-8" />
+</head>
+
+<body>
+    <div id="display"></div>
+    <button>+</button>
+    <button>-</button>
+    <button>/</button>
+    <button>*</button>
+    <button>=</button>
+    <button>0</button>
+    <button>1</button>
+    <button>2</button>
+    <button>3</button>
+    <button>4</button>
+    <button>5</button>
+    <button>6</button>
+    <button>7</button>
+    <button>8</button>
+    <button>9</button>
+    <button>C</button>
+
+    <script>
+        function operate(operands, operators) {
+            for (let i = 0; i < operators.length; i++) {
+                console.log("i=" + i + ": " + operands[i] + operators[i] + operands[i + 1]);
+                switch (operators[i]) {
+                    case "+": operands[i+1] = add(operands[i], operands[i+1]); break; //change the i+1th operand
+                    case "-": operands[i+1] = subtract(operands[i], operands[i+1]); break;
+                    case "*": operands[i+1] = multiply(operands[i], operands[i+1]); break;
+                    case "/": operands[i+1] = divide(operands[i], operands[i+1]); break;
+                }
+                console.log(operands);
+            }
+            return operands[operators.length] //the last i+1th operand changed
+        }
+
+        function add(a, b) {
+            return +a + +b;
+        }
+
+        function subtract(a, b) {
+            return +a - +b;
+        }
+
+        function divide(a, b) {
+            return +a / +b;
+        }
+
+        function multiply(a, b) {
+            console.log(+a * +b);
+            return +a * +b;
+        }
+
+        function onButtonClick(e) { //button is either: C (Clear), Number, Operator
+            if (this.textContent == "C" || display.textContent == result) {
+                operands = [];
+                operators = [];
+                result = "";
+                display.textContent = "";
+                console.log(this);
+                console.log();
+            }
+
+            //if button pressed is a number 
+            if (+this.textContent >= 0) {
+                display.textContent += this.textContent;
+                console.log(this);
+                console.log(display.textContent);
+                console.log(operands);
+                console.log(operators);
+                console.log(result);
+            }
+            //if button pressed is an operator
+            else if (this.textContent != "C"){
+
+                //if button is "=", makes sense only if there are operators. create operands array here
+                if (this.textContent == "=" && operators) {
+                    operands = display.textContent.split(/[+\-*\/]/);
+                    console.log(operands);
+                    if (operators && operands && +display.textContent.charAt(display.textContent.length - 1) >= 0) { //there are operators, there are operands, and the last character on display is a number
+                        result = operate(operands, operators);
+                        display.textContent = result;
+                    }
+                }
+                //register operator (+-*/) if it follows a number.
+                else if (+display.textContent.charAt(display.textContent.length - 1) >= 0) {
+                    operators.push(this.textContent);
+                    display.textContent += this.textContent;
+                }
+                //else if not equals sign, not C, AND last char of display not a number, ie repetitive operator press
+                else if (this.textContent != "=") {
+                    operators[operators.length - 1] = this.textContent;
+                    display.textContent = display.textContent.slice(0, display.textContent.length - 1);
+                    display.textContent += this.textContent;
+                    console.log(operators);
+                }
+            }
+        }
+
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => button.addEventListener('click', onButtonClick));
+
+        const display = document.querySelector('#display');
+        let operands = [];
+        let operators = [];
+        let result;
+
+    </script>
+</body>
+
+</html>
