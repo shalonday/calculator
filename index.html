@@ -26,18 +26,15 @@
     <button>C</button>
 
     <script>
-        function operate(operands, operators) {
-            for (let i = 0; i < operators.length; i++) {
-                console.log("i=" + i + ": " + operands[i] + operators[i] + operands[i + 1]);
-                switch (operators[i]) {
-                    case "+": operands[i+1] = add(operands[i], operands[i+1]); break; //change the i+1th operand
-                    case "-": operands[i+1] = subtract(operands[i], operands[i+1]); break;
-                    case "*": operands[i+1] = multiply(operands[i], operands[i+1]); break;
-                    case "/": operands[i+1] = divide(operands[i], operands[i+1]); break;
-                }
-                console.log(operands);
+        function operate(operand1, operand2, operator) {
+
+            console.log(operand1 + operator + operand2);
+            switch (operator) {
+                case "+": return add(operand1, operand2);
+                case "-": return subtract(operand1, operand2);
+                case "*": return multiply(operand1, operand2);
+                case "/": return divide(operand1, operand2);
             }
-            return operands[operators.length] //the last i+1th operand changed
         }
 
         function add(a, b) {
@@ -53,63 +50,74 @@
         }
 
         function multiply(a, b) {
-            console.log(+a * +b);
+
             return +a * +b;
         }
 
         function onButtonClick(e) { //button is either: C (Clear), Number, Operator
-            if (this.textContent == "C" || display.textContent == result) {
-                operands = [];
-                operators = [];
+            if (this.textContent == "C") {
+                operand1 = ""; //ano nga yung caveat when assigning "undefined"?
+                operand2 = "";
+                operator = "";
                 result = "";
                 display.textContent = "";
-                console.log(this);
-                console.log();
+
             }
 
             //if button pressed is a number 
             if (+this.textContent >= 0) {
-                display.textContent += this.textContent;
-                console.log(this);
-                console.log(display.textContent);
-                console.log(operands);
-                console.log(operators);
-                console.log(result);
-            }
-            //if button pressed is an operator
-            else if (this.textContent != "C"){
 
-                //if button is "=", makes sense only if there are operators. create operands array here
-                if (this.textContent == "=" && operators) {
-                    operands = display.textContent.split(/[+\-*\/]/);
-                    console.log(operands);
-                    if (operators && operands && +display.textContent.charAt(display.textContent.length - 1) >= 0) { //there are operators, there are operands, and the last character on display is a number
-                        result = operate(operands, operators);
-                        display.textContent = result;
-                    }
-                }
-                //register operator (+-*/) if it follows a number.
-                else if (+display.textContent.charAt(display.textContent.length - 1) >= 0) {
-                    operators.push(this.textContent);
-                    display.textContent += this.textContent;
-                }
-                //else if not equals sign, not C, AND last char of display not a number, ie repetitive operator press
-                else if (this.textContent != "=") {
-                    operators[operators.length - 1] = this.textContent;
-                    display.textContent = display.textContent.slice(0, display.textContent.length - 1);
-                    display.textContent += this.textContent;
-                    console.log(operators);
-                }
+                if ((operand1 && operator && (lastButton == "+" || lastButton == "*" || lastButton == "/" || lastButton == "-")) || lastButton == "=")
+                    display.textContent = "";
+                display.textContent += this.textContent;
             }
+
+
+            //if button pressed is an operator and not C, and a number is displayed
+            else if (this.textContent != "C" && display.textContent.length) {
+
+                //if = sign, display a result such that all operand variables become empty
+                if (this.textContent == "=" && operator.length && operand1.length) {
+                    operand2 = display.textContent;
+                    result = operate(operand1, operand2, operator);
+                    display.textContent = result;
+                    operand1 = "";
+                    operand2 = "";
+                    operator = "";
+                }
+
+                //catch repetitive operator press
+                else if (lastButton == "+" || lastButton == "*" || lastButton == "/" || lastButton == "-") {
+                    operator = this.textContent;
+                }
+
+                //if there's already an operand-operator set, 
+                else if (operator.length && operand1.length) {
+                    operand2 = display.textContent; //save the displayed number into operand2 then operate:
+                    operand1 = operate(operand1, operand2, operator) + ""; //set the result to operand1 to allow chaining
+                    display.textContent = operand1;
+                    operand2 = "";
+                }
+
+                //typing operator after a number for the first time saves number into operand1
+                else if (!operand1) {
+                    operand1 = display.textContent;
+                }
+
+                operator = this.textContent;
+            }
+            lastButton = this.textContent;
         }
 
         const buttons = document.querySelectorAll('button');
         buttons.forEach(button => button.addEventListener('click', onButtonClick));
 
         const display = document.querySelector('#display');
-        let operands = [];
-        let operators = [];
-        let result;
+        let operand1 = "";
+        let operand2 = "";
+        let operator = "";
+        let result = "";
+        let lastButton = "";
 
     </script>
 </body>
