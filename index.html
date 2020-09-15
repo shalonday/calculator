@@ -8,22 +8,23 @@
 
 <body>
     <div id="display"></div>
-    <button>+</button>
-    <button>-</button>
-    <button>/</button>
-    <button>*</button>
-    <button>=</button>
-    <button>0</button>
-    <button>1</button>
-    <button>2</button>
-    <button>3</button>
-    <button>4</button>
-    <button>5</button>
-    <button>6</button>
-    <button>7</button>
-    <button>8</button>
-    <button>9</button>
-    <button>C</button>
+    <button class="operator">+</button>
+    <button class="operator">-</button>
+    <button class="operator">/</button>
+    <button class="operator">*</button>
+    <button class="operator">=</button>
+    <button class="num">0</button>
+    <button class="num">1</button>
+    <button class="num">2</button>
+    <button class="num">3</button>
+    <button class="num">4</button>
+    <button class="num">5</button>
+    <button class="num">6</button>
+    <button class="num">7</button>
+    <button class="num">8</button>
+    <button class="num">9</button>
+    <button id="clear">C</button>
+    <button id="decimal">.</button>
 
     <script>
         function operate(operand1, operand2, operator) {
@@ -46,6 +47,7 @@
         }
 
         function divide(a, b) {
+
             return +a / +b;
         }
 
@@ -54,63 +56,105 @@
             return +a * +b;
         }
 
-        function onButtonClick(e) { //button is either: C (Clear), Number, Operator
-            if (this.textContent == "C") {
-                operand1 = ""; //ano nga yung caveat when assigning "undefined"?
-                operand2 = "";
-                operator = "";
-                result = "";
+        function roundFifteenDigits(n) {
+            let digits = n.replace('.', '').length;
+            if (digits >= 15) {
+                let num = +n;
+                return num.toPrecision(15);
+            }
+            return n;
+        }
+
+        function onNumClick(e) {
+            if ((operand1 && operator && (lastButton == "+" || lastButton == "*" || lastButton == "/" || lastButton == "-")) || lastButton == "=" || display.textContent.includes('Division'))
                 display.textContent = "";
+            display.textContent += this.textContent;
+        }
 
-            }
-
-            //if button pressed is a number 
-            if (+this.textContent >= 0) {
-
-                if ((operand1 && operator && (lastButton == "+" || lastButton == "*" || lastButton == "/" || lastButton == "-")) || lastButton == "=")
-                    display.textContent = "";
-                display.textContent += this.textContent;
-            }
-
-
-            //if button pressed is an operator and not C, and a number is displayed
-            else if (this.textContent != "C" && display.textContent.length) {
-
+        function onOpClick(e) {
+            if (display.textContent.length) {
                 //if = sign, display a result such that all operand variables become empty
                 if (this.textContent == "=" && operator.length && operand1.length) {
                     operand2 = display.textContent;
-                    result = operate(operand1, operand2, operator);
-                    display.textContent = result;
+                    if (+operand2 == 0 && operator == "/") { // dividing by 0
+                        display.textContent = "Division by zero. System Failure. Abort all operations.";
+
+                    } else {
+                        result = operate(operand1, operand2, operator) + "";
+                        display.textContent = roundFifteenDigits(result);
+                    }
                     operand1 = "";
                     operand2 = "";
                     operator = "";
+                    console.log("A");
                 }
 
                 //catch repetitive operator press
                 else if (lastButton == "+" || lastButton == "*" || lastButton == "/" || lastButton == "-") {
                     operator = this.textContent;
+                    console.log("B");
                 }
 
                 //if there's already an operand-operator set, 
                 else if (operator.length && operand1.length) {
                     operand2 = display.textContent; //save the displayed number into operand2 then operate:
-                    operand1 = operate(operand1, operand2, operator) + ""; //set the result to operand1 to allow chaining
-                    display.textContent = operand1;
-                    operand2 = "";
+                    if (+operand2 == 0 && operator == "/") { // dividing by 0
+                        display.textContent = "Division by zero. System Failure. Abort all operations.";
+                        operand1 = "";
+                        operand2 = "";
+                        operator = "";
+
+                    } else {
+                        operand1 = operate(operand1, operand2, operator) + ""; //set the result to operand1 to allow chaining
+                        display.textContent = roundFifteenDigits(operand1);
+                        operand2 = "";
+                    }
+                    console.log("C");
                 }
 
                 //typing operator after a number for the first time saves number into operand1
                 else if (!operand1) {
                     operand1 = display.textContent;
+                    console.log("D");
                 }
 
-                operator = this.textContent;
+                //don't save = into operator.
+                if (this.textContent != "=" && display.textContent != "Division by zero. System Failure. Abort all operations.") {
+                    operator = this.textContent;
+                }
+                console.log("operand1: " + operand1 + "operator: " + operator + "Operand2: " + operand2);
+
             }
             lastButton = this.textContent;
+
         }
 
-        const buttons = document.querySelectorAll('button');
-        buttons.forEach(button => button.addEventListener('click', onButtonClick));
+
+        function onDecimalClick(e) {
+            if (!display.textContent.includes("."))
+                display.textContent += ".";
+        }
+
+        function onClrClick(e) {
+            operand1 = "";
+            operand2 = "";
+            operator = "";
+            result = "";
+            display.textContent = "";
+        }
+
+        
+        const nums = document.querySelectorAll('.num');
+        nums.forEach(num => num.addEventListener('click', onNumClick));
+
+        const ops = document.querySelectorAll('.operator');
+        ops.forEach(op => op.addEventListener('click', onOpClick));
+
+        const clr = document.querySelector('#clear');
+        clr.addEventListener('click', onClrClick);
+
+        const decimal = document.querySelector('#decimal');
+        decimal.addEventListener('click', onDecimalClick);
 
         const display = document.querySelector('#display');
         let operand1 = "";
