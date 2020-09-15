@@ -25,6 +25,7 @@
     <button class="num">9</button>
     <button id="clear">C</button>
     <button id="decimal">.</button>
+    <button id="backspace">Backspace</button>
 
     <script>
         function operate(operand1, operand2, operator) {
@@ -69,6 +70,7 @@
             if ((operand1 && operator && (lastButton == "+" || lastButton == "*" || lastButton == "/" || lastButton == "-")) || lastButton == "=" || display.textContent.includes('Division'))
                 display.textContent = "";
             display.textContent += this.textContent;
+            lastButton = this.textContent;
         }
 
         function onOpClick(e) {
@@ -113,7 +115,7 @@
                 }
 
                 //typing operator after a number for the first time saves number into operand1
-                else if (!operand1) {
+                else if (!operand1.length) {
                     operand1 = display.textContent;
                     console.log("D");
                 }
@@ -133,6 +135,8 @@
         function onDecimalClick(e) {
             if (!display.textContent.includes("."))
                 display.textContent += ".";
+
+            lastButton = this.textContent;
         }
 
         function onClrClick(e) {
@@ -143,7 +147,16 @@
             display.textContent = "";
         }
 
-        
+        function onBackspaceClick(e) { 
+
+            if (display.textContent.length && lastButton != "=") {
+                if ((!operand1.length && !operator.length) || (operand1.length && operator.length)) { //if (future operand1) || (future operand2)
+                    display.textContent = display.textContent.slice(0, display.textContent.length - 1); 
+                } 
+            }
+        }
+
+
         const nums = document.querySelectorAll('.num');
         nums.forEach(num => num.addEventListener('click', onNumClick));
 
@@ -155,6 +168,9 @@
 
         const decimal = document.querySelector('#decimal');
         decimal.addEventListener('click', onDecimalClick);
+
+        const backspace = document.querySelector('#backspace');
+        backspace.addEventListener('click', onBackspaceClick);
 
         const display = document.querySelector('#display');
         let operand1 = "";
