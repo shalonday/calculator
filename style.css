@@ -6,6 +6,7 @@
     grid-template-columns: repeat(4, 85px);
     grid-template-rows: minmax(100px, auto) repeat(5, 70px);
     width: fit-content;
+    width: -moz-fit-content;
     gap: 2px;
     position:absolute;
     top: 10%;
